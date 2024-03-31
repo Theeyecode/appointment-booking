@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "585279219951",
+    "project_id": "appointment-booking-app-b138c",
+    "storage_bucket": "appointment-booking-app-b138c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:585279219951:android:17bc5f2e27b53a5bf3931a",
+        "android_client_info": {
+          "package_name": "com.example.appointment_booking_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "585279219951-s0nv4oe0g9qf3k0rrn7dp4pcbjjjlfel.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.appointment_booking_app",
+            "certificate_hash": "48a7ccbeb0f9c62554310884de19f616163aad17"
+          }
+        },
+        {
+          "client_id": "585279219951-i5i22s1n6rrohd1nr8cdb9jllr3fesmu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTjLuPehJhTz8XGJXD8xsQSRJ1Ln4Eyao"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "585279219951-i5i22s1n6rrohd1nr8cdb9jllr3fesmu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "585279219951-4570la3l6gprm1fm8h6ujplp64imrrno.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.appointmentBookingApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
