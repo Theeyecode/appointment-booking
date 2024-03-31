@@ -10,6 +10,9 @@ class MerchantNotifier extends StateNotifier<Merchant?> {
 
   MerchantNotifier() : super(null);
 
+  List<TimeSlot>? _timeSlots;
+  List<TimeSlot>? get timeSlots => _timeSlots;
+
   // Fetch or create merchant
   Future<void> fetchOrCreateMerchant(String userId, {String? name}) async {
     try {
@@ -44,15 +47,18 @@ class MerchantNotifier extends StateNotifier<Merchant?> {
     return false;
   }
 
-  Future<List<TimeSlot>> loadMerchantTimeSlots() async {
-    final merchantId = state?.id;
-    if (merchantId != null) {
-      List<TimeSlot> slots =
-          await _merchantService.fetchMerchantTimeSlots(merchantId);
+  Future<List<TimeSlot>> loadMerchantTimeSlots(String id,
+      {String? merchantId}) async {
+    print('Got to loadMerchantTimeSlots: $id');
+
+    List<TimeSlot> slots = await _merchantService.fetchMerchantTimeSlots(id);
+    // If merchantId was not provided, update the state.
+    if (merchantId == null) {
       state = state?.copyWith(availableTimeSlots: slots);
-      return slots;
     }
-    return [];
+    _timeSlots = slots;
+    print('Got to loadMerchantTimeSlots: ${_timeSlots!.length}');
+    return slots;
   }
 
   Future<bool> deleteTimeSlot(TimeSlot slot) async {
@@ -68,5 +74,26 @@ class MerchantNotifier extends StateNotifier<Merchant?> {
       return true;
     }
     return false;
+  }
+
+  Future<bool> markSelectedSlotsAsBooked(
+      Set<String> slotIds, String? merchantId) async {
+    if (merchantId == null) {
+      print("No merchant ID found.");
+      return false;
+    }
+    try {
+      final success =
+          await _merchantService.markSlotsAsBooked(merchantId, slotIds);
+      if (success) {
+        // Optionally refresh the merchant's time slots from the database
+        await loadMerchantTimeSlots(state!.id);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print("Error marking slots as booked: $e");
+      return false;
+    }
   }
 }

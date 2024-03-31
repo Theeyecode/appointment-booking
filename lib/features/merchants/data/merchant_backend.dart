@@ -124,4 +124,30 @@ class MerchantService {
       return [];
     }
   }
+
+  Future<bool> markSlotsAsBooked(String merchantId, Set<String> slotIds) async {
+    DocumentReference merchantRef = _db.collection('merchants').doc(merchantId);
+    try {
+      var merchantSnapshot = await merchantRef.get();
+      if (!merchantSnapshot.exists) throw Exception("Merchant not found!");
+
+      var merchantData = merchantSnapshot.data() as Map<String, dynamic>;
+      var slotsData = List<Map<String, dynamic>>.from(
+          merchantData['availableTimeSlots'] ?? []);
+
+      // Mark selected slots as booked
+      for (var slot in slotsData) {
+        if (slotIds.contains(slot['id'])) {
+          slot['booked'] = true;
+        }
+      }
+
+      // Save updated slots back to Firestore
+      await merchantRef.update({'availableTimeSlots': slotsData});
+      return true;
+    } catch (e) {
+      print("Error marking slots as booked: $e");
+      return false;
+    }
+  }
 }

@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:appointment_booking_app/core/app/app_colors.dart';
 import 'package:appointment_booking_app/features/merchants/models/time_slot.dart';
 import 'package:appointment_booking_app/features/merchants/presentation/views/show_custom.dart';
 import 'package:appointment_booking_app/providers/merchant_providers.dart';
@@ -20,18 +21,6 @@ class ManageAvailabilityScreen extends ConsumerStatefulWidget {
 class ManageAvailabilityScreenState
     extends ConsumerState<ManageAvailabilityScreen> {
   List<TimeSlot> timeSlots = [];
-  // Map<String, List<TimeSlot>> groupTimeSlotsByDate(List<TimeSlot> slots) {
-  //   Map<String, List<TimeSlot>> grouped = {};
-  //   for (var slot in slots) {
-  //     String dateKey = DateFormat('yyyy-MM-dd').format(slot.start);
-  //     if (grouped.containsKey(dateKey)) {
-  //       grouped[dateKey]!.add(slot);
-  //     } else {
-  //       grouped[dateKey] = [slot];
-  //     }
-  //   }
-  //   return grouped;
-  // }
   Map<String, List<TimeSlot>> groupTimeSlotsByDate(List<TimeSlot> slots) {
     Map<String, List<TimeSlot>> grouped = {};
     for (var slot in slots) {
@@ -40,120 +29,6 @@ class ManageAvailabilityScreenState
     }
     return grouped;
   }
-
-  // Future<void> _addOrEditTimeSlot({
-  //   TimeSlot? existingSlot,
-  //   int? index,
-  //   bool isFetched = false,
-  // }) async {
-  //   final now = DateTime.now();
-  //   final today = DateTime(now.year, now.month, now.day);
-
-  //   final DateTime? pickedDate = await showDatePicker(
-  //     context: context,
-  //     initialDate: existingSlot?.start ?? now,
-  //     firstDate: today,
-  //     lastDate: DateTime(now.year + 5),
-  //   );
-
-  //   if (pickedDate == null) return;
-
-  //   final TimeOfDay? pickedStartTime = await showCustomTimePicker(
-  //     context: context,
-  //     pickedDate: pickedDate,
-  //     selectionType: TimeSelectionType.startTime,
-  //   );
-
-  //   if (pickedStartTime == null) return;
-
-  //   final TimeOfDay? pickedEndTime = await showCustomTimePicker(
-  //     context: context,
-  //     pickedDate: pickedDate,
-  //     selectionType: TimeSelectionType.endTime,
-  //   );
-
-  //   if (pickedEndTime == null ||
-  //       pickedEndTime.hour < pickedStartTime.hour ||
-  //       (pickedEndTime.hour == pickedStartTime.hour &&
-  //           pickedEndTime.minute <= pickedStartTime.minute)) {
-  //     Fluttertoast.showToast(
-  //       msg: "Invalid time range selected.",
-  //       toastLength: Toast.LENGTH_LONG,
-  //       gravity: ToastGravity.CENTER,
-  //       backgroundColor: Colors.redAccent,
-  //       textColor: Colors.white,
-  //       fontSize: 16.0,
-  //     );
-  //     return;
-  //   }
-
-  //   final DateTime startDateTime = DateTime(
-  //     pickedDate.year,
-  //     pickedDate.month,
-  //     pickedDate.day,
-  //     pickedStartTime.hour,
-  //     pickedStartTime.minute,
-  //   );
-
-  //   final DateTime endDateTime = DateTime(
-  //     pickedDate.year,
-  //     pickedDate.month,
-  //     pickedDate.day,
-  //     pickedEndTime.hour,
-  //     pickedEndTime.minute,
-  //   );
-
-  //   // Define a function to check if two time ranges overlap
-  //   bool timeRangesOverlap(
-  //       DateTime start1, DateTime end1, DateTime start2, DateTime end2) {
-  //     return start1.isBefore(end2) && end1.isAfter(start2);
-  //   }
-
-  //   List<TimeSlot> relevantSlots =
-  //       isFetched ? fetchedTimeSlots : newlyAddedTimeSlots;
-  //   if (existingSlot != null)
-  //     relevantSlots =
-  //         relevantSlots.where((slot) => slot != existingSlot).toList();
-
-  //   // Check for overlap with all existing slots
-  //   bool overlapsWithExisting = relevantSlots.any((slot) {
-  //     return timeRangesOverlap(
-  //         startDateTime, endDateTime, slot.start, slot.end);
-  //   });
-
-  //   if (overlapsWithExisting) {
-  //     Fluttertoast.showToast(
-  //       msg: "The selected time range overlaps with an existing time range.",
-  //       toastLength: Toast.LENGTH_LONG,
-  //       gravity: ToastGravity.CENTER,
-  //       backgroundColor: Colors.redAccent,
-  //       textColor: Colors.white,
-  //       fontSize: 16.0,
-  //     );
-  //     return;
-  //   }
-
-  //   final TimeSlot newSlot = existingSlot?.copyWith(
-  //           start: startDateTime, end: endDateTime, date: pickedDate) ??
-  //       TimeSlot(
-  //           id: const Uuid().v4(),
-  //           start: startDateTime,
-  //           end: endDateTime,
-  //           date: pickedDate);
-
-  //   // Handle adding or updating slots in the appropriate list
-  //   if (existingSlot != null && index != null) {
-  //     if (isFetched) {
-  //       fetchedTimeSlots[index] = newSlot;
-  //     } else {
-  //       newlyAddedTimeSlots[index] = newSlot;
-  //     }
-  //   } else {
-  //     newlyAddedTimeSlots.add(newSlot);
-  //   }
-
-  //   setState(() {}); // Trigger a rebuild with the updated state
-  // }
 
   Future<void> _addOrEditTimeSlot({
     TimeSlot? existingSlot,
@@ -324,8 +199,10 @@ class ManageAvailabilityScreenState
 
   Future<void> fetchTimeSlots() async {
     // Assuming fetchTimeSlots() is implemented in your merchantNotifier
+    final id = ref.read(merchantProvider)?.id;
+
     final slotsFromFirestore =
-        await ref.read(merchantProvider.notifier).loadMerchantTimeSlots();
+        await ref.read(merchantProvider.notifier).loadMerchantTimeSlots(id!);
     if (mounted) {
       setState(() {
         fetchedTimeSlots = slotsFromFirestore;
@@ -425,19 +302,71 @@ class ManageAvailabilityScreenState
   }
 }
 
+// class TimeSlotCard extends StatelessWidget {
+//   final String date;
+//   final List<TimeSlot> slots;
+//   final Function(TimeSlot) onEdit;
+//   final Function(TimeSlot) onDelete;
+
+//   const TimeSlotCard(
+//       {Key? key,
+//       required this.date,
+//       required this.slots,
+//       required this.onEdit,
+//       required this.onDelete})
+//       : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Card(
+//       margin: const EdgeInsets.all(8.0),
+//       child: Padding(
+//         padding: const EdgeInsets.all(8.0),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Text(
+//               DateFormat('EEEE, MMMM d, yyyy').format(DateTime.parse(date)),
+//               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+//             ),
+//             ...slots.map((slot) {
+//               final startTime = DateFormat('HH:mm').format(slot.start);
+//               final endTime = DateFormat('HH:mm').format(slot.end);
+
+//               return ListTile(
+//                 title: Text("$startTime - $endTime"),
+//                 trailing: Row(
+//                   mainAxisSize: MainAxisSize.min,
+//                   children: [
+//                     IconButton(
+//                         icon: const Icon(Icons.edit),
+//                         onPressed: () => onEdit(slot)),
+//                     IconButton(
+//                         icon: const Icon(Icons.delete),
+//                         onPressed: () => onDelete(slot)),
+//                   ],
+//                 ),
+//               );
+//             }).toList(),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 class TimeSlotCard extends StatelessWidget {
   final String date;
   final List<TimeSlot> slots;
   final Function(TimeSlot) onEdit;
   final Function(TimeSlot) onDelete;
 
-  const TimeSlotCard(
-      {Key? key,
-      required this.date,
-      required this.slots,
-      required this.onEdit,
-      required this.onDelete})
-      : super(key: key);
+  const TimeSlotCard({
+    Key? key,
+    required this.date,
+    required this.slots,
+    required this.onEdit,
+    required this.onDelete,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -458,17 +387,34 @@ class TimeSlotCard extends StatelessWidget {
 
               return ListTile(
                 title: Text("$startTime - $endTime"),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => onEdit(slot)),
-                    IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () => onDelete(slot)),
-                  ],
-                ),
+                trailing: slot.booked
+                    ? Container(
+                        decoration: BoxDecoration(
+                            color: AppColors.indicator.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(8)),
+                        child: const Padding(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          child: Text(
+                            'Booked',
+                            style:
+                                TextStyle(color: AppColors.bgw, fontSize: 12),
+                          ),
+                        ),
+                      ) // If booked, show a check mark
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () => onEdit(slot),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () => onDelete(slot),
+                          ),
+                        ],
+                      ),
               );
             }).toList(),
           ],

@@ -11,6 +11,7 @@ final merchantProvider =
 
 final listmerchantProvider = FutureProvider<List<Merchant>>((ref) async {
   final merchantService = ref.watch(merchantServiceProvider);
+
   return merchantService.fetchMerchants();
 });
 

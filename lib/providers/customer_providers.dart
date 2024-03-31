@@ -4,5 +4,5 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/customer/models/customer.dart';
 
 final customerProvider = StateNotifierProvider<CustomerNotifier, Customer?>(
-  (ref) => CustomerNotifier(),
+  (ref) => CustomerNotifier(ref),
 );

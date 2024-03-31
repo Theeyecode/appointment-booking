@@ -32,4 +32,40 @@ class CustomerService {
     }
     return Customer(id: '', name: '', appointments: []);
   }
+
+  Future<void> updateCustomer(Customer customer) async {
+    try {
+      await _firestore
+          .collection('customers')
+          .doc(customer.id)
+          .update(customer.toMap());
+    } catch (e) {
+      print("Error updating customer: $e");
+      throw e; // Re-throw the error to handle it in the calling code.
+    }
+  }
+
+  Future<bool> addAppointmentToCustomer(
+      String customerId, String merchantId, String timeSlotId) async {
+    try {
+      DocumentReference customerRef =
+          _firestore.collection('customers').doc(customerId);
+
+      // Create the new appointment object
+      Map<String, dynamic> newAppointment = {
+        'merchantId': merchantId,
+        'timeSlotId': timeSlotId,
+      };
+
+      // Update the customer's appointments array
+      await customerRef.update({
+        'appointments': FieldValue.arrayUnion([newAppointment]),
+      });
+
+      return true;
+    } catch (e) {
+      print("Error adding appointment to customer: $e");
+      return false;
+    }
+  }
 }
