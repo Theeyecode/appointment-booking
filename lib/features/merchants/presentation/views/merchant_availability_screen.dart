@@ -4,6 +4,7 @@ import 'package:appointment_booking_app/core/app/app_colors.dart';
 import 'package:appointment_booking_app/features/merchants/models/time_slot.dart';
 import 'package:appointment_booking_app/features/merchants/presentation/views/show_custom.dart';
 import 'package:appointment_booking_app/providers/merchant_providers.dart';
+import 'package:appointment_booking_app/providers/user_id_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -163,6 +164,7 @@ class ManageAvailabilityScreenState
         ..addAll(newlyAddedTimeSlots);
 
       final merchantNotifier = ref.read(merchantProvider.notifier);
+
       bool success =
           await merchantNotifier.manageMerchantAvailability(allSlots);
 
@@ -199,7 +201,7 @@ class ManageAvailabilityScreenState
 
   Future<void> fetchTimeSlots() async {
     // Assuming fetchTimeSlots() is implemented in your merchantNotifier
-    final id = ref.read(merchantProvider)?.id;
+    final id = ref.read(userIdProvider);
 
     final slotsFromFirestore =
         await ref.read(merchantProvider.notifier).loadMerchantTimeSlots(id!);

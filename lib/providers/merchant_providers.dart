@@ -20,9 +20,15 @@ final merchantServiceProvider = Provider<MerchantService>((ref) {
   return MerchantService();
 });
 
-final appointmentsByMerchantProvider =
-    FutureProvider.family<List<AppointmentDetail>, String>(
-        (ref, merchantId) async {
-  final appointmentService = ref.read(merchantServiceProvider);
-  return await appointmentService.fetchAppointmentsByMerchant(merchantId);
-});
+// final appointmentsByMerchantProvider =
+//     FutureProvider.family<List<CustomerBookingDetail>, String>(
+//         (ref, merchantId) async {
+//   final appointmentService = ref.read(merchantServiceProvider);
+//   return await appointmentService.fetchAppointmentsByMerchant(merchantId);
+// });
+
+// final appointmentsByCustomerProvider =
+//     FutureProvider<List<MerchantBookingDetail>>((ref) {
+//   final merchantService = ref.watch(merchantServiceProvider);
+//   return merchantService.fetchAppointmentsByCustomer();
+// });

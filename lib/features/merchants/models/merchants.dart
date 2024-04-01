@@ -1,13 +1,16 @@
 import 'package:appointment_booking_app/features/merchants/models/time_slot.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Merchant {
   final String id;
   final String name;
+  final DateTime? createdAt;
   List<TimeSlot>? availableTimeSlots;
 
   Merchant({
     required this.id,
     required this.name,
+    required this.createdAt,
     this.availableTimeSlots,
   });
 
@@ -15,6 +18,7 @@ class Merchant {
     return {
       'id': id,
       'name': name,
+      'created_at': Timestamp.fromDate(createdAt!),
       'availableTimeSlots':
           availableTimeSlots?.map((slot) => slot.toMap()).toList(),
     };
@@ -24,6 +28,7 @@ class Merchant {
     return Merchant(
       id: map['id'],
       name: map['name'],
+      createdAt: (map['created_at'] as Timestamp).toDate(),
       availableTimeSlots: map['availableTimeSlots'] != null
           ? List<TimeSlot>.from(
               map['availableTimeSlots'].map((slot) => TimeSlot.fromMap(slot)))
@@ -34,11 +39,13 @@ class Merchant {
   Merchant copyWith({
     String? id,
     String? name,
+    DateTime? createdAt,
     List<TimeSlot>? availableTimeSlots,
   }) {
     return Merchant(
       id: id ?? this.id,
       name: name ?? this.name,
+      createdAt: createdAt ?? this.createdAt,
       availableTimeSlots: availableTimeSlots ?? this.availableTimeSlots,
     );
   }

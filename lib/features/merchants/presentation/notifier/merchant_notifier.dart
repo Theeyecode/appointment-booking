@@ -2,7 +2,6 @@ import 'package:appointment_booking_app/features/customer/models/appointment.dar
 import 'package:appointment_booking_app/features/merchants/data/merchant_backend.dart';
 import 'package:appointment_booking_app/features/merchants/models/merchants.dart';
 import 'package:appointment_booking_app/features/merchants/models/time_slot.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Adjust path as necessary
@@ -17,6 +16,7 @@ class MerchantNotifier extends StateNotifier<Merchant?> {
 
   // Fetch or create merchant
   Future<void> fetchOrCreateMerchant(String userId, {String? name}) async {
+    clearTimeSlots();
     try {
       final merchant =
           await _merchantService.fetchOrCreateMerchant(userId, name: name);
@@ -86,5 +86,9 @@ class MerchantNotifier extends StateNotifier<Merchant?> {
     } catch (e) {
       return false;
     }
+  }
+
+  void clearTimeSlots() {
+    state = state?.copyWith(availableTimeSlots: []);
   }
 }

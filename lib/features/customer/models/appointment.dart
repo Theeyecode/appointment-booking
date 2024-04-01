@@ -32,12 +32,12 @@ class Appointment {
   }
 }
 
-class AppointmentDetail {
+class CustomerBookingDetail {
   final String appointmentId;
   final String customerName;
   final TimeSlot timeSlot;
 
-  AppointmentDetail({
+  CustomerBookingDetail({
     required this.appointmentId,
     required this.customerName,
     required this.timeSlot,
@@ -51,8 +51,8 @@ class AppointmentDetail {
     };
   }
 
-  factory AppointmentDetail.fromMap(Map<String, dynamic> map) {
-    return AppointmentDetail(
+  factory CustomerBookingDetail.fromMap(Map<String, dynamic> map) {
+    return CustomerBookingDetail(
       appointmentId: map['appointmentId'],
       customerName: map['customerName'],
       timeSlot: TimeSlot.fromMap(map['timeSlot']),
@@ -62,5 +62,38 @@ class AppointmentDetail {
   @override
   String toString() {
     return 'Appointment with $customerName for ${timeSlot.toString()}';
+  }
+}
+
+class MerchantBookingDetail {
+  final String appointmentId;
+  final String merchantName;
+  final TimeSlot timeSlot;
+
+  MerchantBookingDetail({
+    required this.appointmentId,
+    required this.merchantName,
+    required this.timeSlot,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'appointmentId': appointmentId,
+      'customerName': merchantName,
+      'timeSlot': timeSlot.toMap(),
+    };
+  }
+
+  factory MerchantBookingDetail.fromMap(Map<String, dynamic> map) {
+    return MerchantBookingDetail(
+      appointmentId: map['appointmentId'],
+      merchantName: map['merchantName'],
+      timeSlot: TimeSlot.fromMap(map['timeSlot']),
+    );
+  }
+
+  @override
+  String toString() {
+    return 'Appointment with $merchantName for ${timeSlot.toString()}';
   }
 }

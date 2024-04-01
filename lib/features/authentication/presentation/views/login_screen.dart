@@ -7,6 +7,7 @@ import 'package:appointment_booking_app/features/authentication/presentation/vie
 import 'package:appointment_booking_app/features/dashboard/presentation/views/homescreen.dart';
 import 'package:appointment_booking_app/features/merchants/presentation/views/merchant_dashboard.dart';
 import 'package:appointment_booking_app/providers/auth_providers.dart';
+import 'package:appointment_booking_app/providers/merchant_providers.dart';
 import 'package:appointment_booking_app/shared/loading/loading_screen.dart';
 import 'package:appointment_booking_app/shared/show_toast.dart';
 
@@ -59,7 +60,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
 
       // Assuming AuthState has a way to check if the user is logged in successfully.
       if (authState.userId != null) {
-        navigateBasedOnUserType();
+        navigateBasedOnUserType(authState.userId);
       } else {
         // Handle failed login attempt.
         showErrorToast("Login failed");
@@ -73,11 +74,14 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  void navigateBasedOnUserType() {
+  void navigateBasedOnUserType(String? userId) async {
     final userType = ref.read(authStateProvider.notifier).userModel?.userType ??
         UserType.unKnown;
     switch (userType) {
       case UserType.merchant:
+        await ref
+            .read(merchantProvider.notifier)
+            .fetchOrCreateMerchant(userId!);
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
               builder: (context) => const MerchantDashboardScreen()),
@@ -132,7 +136,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                 // username textfield
                 MyTextField(
                   controller: emailController,
-                  hintText: 'customer@email.com',
+                  hintText: 'appointment@email.com',
                   obscureText: false,
                 ),
 

@@ -15,7 +15,7 @@ class HomePageState extends ConsumerState<HomePage> {
   // Updated to include BookedScreen
   static final List<Widget> _widgetOptions = <Widget>[
     const MerchantListScreen(), // Displays the merchant list
-    const BookedScreen(), // Displays booked appointments
+    const BookedScreen() // Displays booked appointments
   ];
 
   void _onItemTapped(int index) {

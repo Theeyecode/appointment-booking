@@ -13,9 +13,15 @@ import '../../../merchants/models/merchants.dart';
 class MerchantListScreen extends ConsumerWidget {
   const MerchantListScreen({super.key});
 
+  Future<void> _refreshMerchants(WidgetRef ref) async {
+    // Call the provider to refresh merchants
+    await ref.read(listmerchantProvider.future);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final merchantsAsyncValue = ref.watch(listmerchantProvider);
+    final authValue = ref.read(authStateProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(
@@ -49,72 +55,75 @@ class MerchantListScreen extends ConsumerWidget {
         child: SafeArea(
           child: merchantsAsyncValue.when(
             data: (merchants) {
-              return Column(
-                children: [
-                  // The large container on top
-                  Container(
-                    width: double.infinity,
-                    height: 200, // Adjust the height as needed
-                    decoration: BoxDecoration(
-                      color: Colors.deepPurple.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+              return RefreshIndicator(
+                onRefresh: () => _refreshMerchants(ref),
+                child: Column(
+                  children: [
+                    // The large container on top
+                    Container(
+                      width: double.infinity,
+                      height: 200, // Adjust the height as needed
+                      decoration: BoxDecoration(
+                        color: Colors.deepPurple.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
 
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Welcome",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Welcome ${authValue.userModel!.displayName.length > 24 ? '${authValue.userModel!.displayName.substring(0, 21)}...' : authValue.userModel!.displayName}",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        Height10(),
-                        Text(
-                          "Select a merchant to book an appointment",
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 16,
+                          const Height10(),
+                          const Text(
+                            "Select a merchant to book an appointment",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: merchants.isEmpty
-                        ? const Center(
-                            child: Text("No merchants available"),
-                          )
-                        : ListView.separated(
-                            itemCount: merchants.length,
-                            itemBuilder: (context, index) {
-                              Merchant merchant = merchants[index];
-                              return MerchantsListCard(
-                                merchant: merchant,
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          MerchantTimeSlotScreen(
-                                              merchant: merchant),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                            separatorBuilder: (context, index) {
-                              return Divider(
-                                  height: 1,
-                                  thickness: 1,
-                                  color: Colors.grey[300]);
-                            },
-                          ),
-                  ),
-                ],
+                    Expanded(
+                      child: merchants.isEmpty
+                          ? const Center(
+                              child: Text("No merchants available"),
+                            )
+                          : ListView.separated(
+                              itemCount: merchants.length,
+                              itemBuilder: (context, index) {
+                                Merchant merchant = merchants[index];
+                                return MerchantsListCard(
+                                  merchant: merchant,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            MerchantTimeSlotScreen(
+                                                merchant: merchant),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              separatorBuilder: (context, index) {
+                                return Divider(
+                                    height: 1,
+                                    thickness: 1,
+                                    color: Colors.grey[300]);
+                              },
+                            ),
+                    ),
+                  ],
+                ),
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
