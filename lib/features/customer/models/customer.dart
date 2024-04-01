@@ -10,13 +10,6 @@ class Customer {
     required this.name,
     this.appointments,
   });
-
-  void addAppointment(String merchantId, String timeSlotId) {
-    final newAppointment =
-        Appointment(merchantId: merchantId, timeSlotId: timeSlotId);
-    appointments = (appointments ?? [])..add(newAppointment);
-  }
-
   Map<String, dynamic> toMap() {
     return {
       'id': id,

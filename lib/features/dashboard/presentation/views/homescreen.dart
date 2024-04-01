@@ -1,4 +1,3 @@
-import 'package:appointment_booking_app/core/app/app_colors.dart';
 import 'package:appointment_booking_app/features/dashboard/presentation/views/bookedscreen.dart';
 import 'package:appointment_booking_app/features/dashboard/presentation/views/merchant_list.dart';
 import 'package:flutter/material.dart';

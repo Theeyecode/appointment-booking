@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:appointment_booking_app/features/customer/data/customer_backend.dart';
 import 'package:appointment_booking_app/features/customer/models/appointment.dart';
-import 'package:appointment_booking_app/providers/user_id_provider.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../models/customer.dart';
 
@@ -30,22 +30,24 @@ class CustomerNotifier extends StateNotifier<Customer?> {
   Future<bool> bookSlot(String merchantId, String timeSlotId) async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) {
-      print("No user ID found.");
       return false;
     }
 
-    // Fetch or create customer to ensure we always have a valid customer object
     final customer = await _customerService.fetchOrCreateCustomer(userId);
     state = customer; // Update state with the fetched or created customer
 
     try {
-      Appointment newAppointment =
-          Appointment(merchantId: merchantId, timeSlotId: timeSlotId);
-      // Directly add the appointment to Firestore to avoid state inconsistencies
+      // Create an appointment with a new ID
+      Appointment newAppointment = Appointment(
+        id: const Uuid().v4(), // Or use a UUID
+        merchantId: merchantId,
+        customerId: userId,
+        timeSlotId: timeSlotId,
+      );
+
       return await _customerService.addAppointmentToCustomer(
-          customer.id, merchantId, timeSlotId);
+          userId, newAppointment);
     } catch (e) {
-      print("Error booking slot: $e");
       return false;
     }
   }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../models/appointment.dart';
 import '../models/customer.dart';
 
 class CustomerService {
@@ -41,30 +42,21 @@ class CustomerService {
           .update(customer.toMap());
     } catch (e) {
       print("Error updating customer: $e");
-      throw e; // Re-throw the error to handle it in the calling code.
+      rethrow; // Re-throw the error to handle it in the calling code.
     }
   }
 
   Future<bool> addAppointmentToCustomer(
-      String customerId, String merchantId, String timeSlotId) async {
+      String customerId, Appointment appointment) async {
     try {
-      DocumentReference customerRef =
-          _firestore.collection('customers').doc(customerId);
-
-      // Create the new appointment object
-      Map<String, dynamic> newAppointment = {
-        'merchantId': merchantId,
-        'timeSlotId': timeSlotId,
-      };
-
-      // Update the customer's appointments array
-      await customerRef.update({
-        'appointments': FieldValue.arrayUnion([newAppointment]),
-      });
+      // If you want a specific document ID, otherwise Firestore generates it
+      await _firestore
+          .collection('appointments')
+          .doc(appointment.id)
+          .set(appointment.toMap());
 
       return true;
     } catch (e) {
-      print("Error adding appointment to customer: $e");
       return false;
     }
   }

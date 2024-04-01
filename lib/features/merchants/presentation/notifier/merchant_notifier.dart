@@ -1,6 +1,8 @@
+import 'package:appointment_booking_app/features/customer/models/appointment.dart';
 import 'package:appointment_booking_app/features/merchants/data/merchant_backend.dart';
 import 'package:appointment_booking_app/features/merchants/models/merchants.dart';
 import 'package:appointment_booking_app/features/merchants/models/time_slot.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Adjust path as necessary
@@ -10,8 +12,8 @@ class MerchantNotifier extends StateNotifier<Merchant?> {
 
   MerchantNotifier() : super(null);
 
-  List<TimeSlot>? _timeSlots;
-  List<TimeSlot>? get timeSlots => _timeSlots;
+  List<Appointment>? _appointments;
+  List<Appointment>? get appointments => _appointments;
 
   // Fetch or create merchant
   Future<void> fetchOrCreateMerchant(String userId, {String? name}) async {
@@ -34,30 +36,21 @@ class MerchantNotifier extends StateNotifier<Merchant?> {
       if (success) {
         state = state?.copyWith(availableTimeSlots: slots);
         return true;
-        // Optionally, you can show a success message or perform other actions here.
       } else {
         return false;
-        // Optionally, you can show an error message or perform other actions here.
       }
-    } else {
-      print('merchant id is null');
-      // Handle the case when merchant ID is not available.
-      // Optionally, you can show an error message or perform other actions here.
-    }
+    } else {}
     return false;
   }
 
   Future<List<TimeSlot>> loadMerchantTimeSlots(String id,
       {String? merchantId}) async {
-    print('Got to loadMerchantTimeSlots: $id');
-
     List<TimeSlot> slots = await _merchantService.fetchMerchantTimeSlots(id);
-    // If merchantId was not provided, update the state.
+
     if (merchantId == null) {
       state = state?.copyWith(availableTimeSlots: slots);
     }
-    _timeSlots = slots;
-    print('Got to loadMerchantTimeSlots: ${_timeSlots!.length}');
+
     return slots;
   }
 
@@ -79,7 +72,6 @@ class MerchantNotifier extends StateNotifier<Merchant?> {
   Future<bool> markSelectedSlotsAsBooked(
       Set<String> slotIds, String? merchantId) async {
     if (merchantId == null) {
-      print("No merchant ID found.");
       return false;
     }
     try {
@@ -92,7 +84,6 @@ class MerchantNotifier extends StateNotifier<Merchant?> {
       }
       return false;
     } catch (e) {
-      print("Error marking slots as booked: $e");
       return false;
     }
   }

@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 
 import '../../../core/typedefs/user_id.dart';
 
-//Include AuthResult, a loading property and a userID
 @immutable
 class AuthState {
   final AuthResult? result;

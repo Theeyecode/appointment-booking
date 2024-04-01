@@ -6,7 +6,6 @@ class AppointmentPreviewCard extends StatelessWidget {
     this.appointment,
   });
 
-  // TODO: Create the Appointment class
   final dynamic appointment;
 
   @override

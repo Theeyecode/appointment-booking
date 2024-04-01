@@ -238,6 +238,7 @@ class ManageAvailabilityScreenState
         ],
       ),
       body: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: groupedSlots.keys.length,
         itemBuilder: (context, index) {
           final date = groupedSlots.keys.elementAt(index);
@@ -302,58 +303,6 @@ class ManageAvailabilityScreenState
   }
 }
 
-// class TimeSlotCard extends StatelessWidget {
-//   final String date;
-//   final List<TimeSlot> slots;
-//   final Function(TimeSlot) onEdit;
-//   final Function(TimeSlot) onDelete;
-
-//   const TimeSlotCard(
-//       {Key? key,
-//       required this.date,
-//       required this.slots,
-//       required this.onEdit,
-//       required this.onDelete})
-//       : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Card(
-//       margin: const EdgeInsets.all(8.0),
-//       child: Padding(
-//         padding: const EdgeInsets.all(8.0),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Text(
-//               DateFormat('EEEE, MMMM d, yyyy').format(DateTime.parse(date)),
-//               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-//             ),
-//             ...slots.map((slot) {
-//               final startTime = DateFormat('HH:mm').format(slot.start);
-//               final endTime = DateFormat('HH:mm').format(slot.end);
-
-//               return ListTile(
-//                 title: Text("$startTime - $endTime"),
-//                 trailing: Row(
-//                   mainAxisSize: MainAxisSize.min,
-//                   children: [
-//                     IconButton(
-//                         icon: const Icon(Icons.edit),
-//                         onPressed: () => onEdit(slot)),
-//                     IconButton(
-//                         icon: const Icon(Icons.delete),
-//                         onPressed: () => onDelete(slot)),
-//                   ],
-//                 ),
-//               );
-//             }).toList(),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
 class TimeSlotCard extends StatelessWidget {
   final String date;
   final List<TimeSlot> slots;
@@ -361,12 +310,12 @@ class TimeSlotCard extends StatelessWidget {
   final Function(TimeSlot) onDelete;
 
   const TimeSlotCard({
-    Key? key,
+    super.key,
     required this.date,
     required this.slots,
     required this.onEdit,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -416,7 +365,7 @@ class TimeSlotCard extends StatelessWidget {
                         ],
                       ),
               );
-            }).toList(),
+            }),
           ],
         ),
       ),

@@ -18,7 +18,7 @@ Future<TimeOfDay?> showCustomTimePicker({
       : "Select End Time";
 
   // Initial and earliest time considerations
-  TimeOfDay initialTime = TimeOfDay(hour: 0, minute: 0);
+  TimeOfDay initialTime = const TimeOfDay(hour: 0, minute: 0);
   TimeOfDay? earliestTime;
   if (isToday) {
     initialTime = nowTime;

@@ -2,6 +2,7 @@ import 'package:appointment_booking_app/features/merchants/models/time_slot.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../customer/models/appointment.dart';
 import '../models/merchants.dart'; // Adjust import path as necessary
 
 class MerchantService {
@@ -38,24 +39,16 @@ class MerchantService {
   Future<bool> updateMerchantAvailability(
       String merchantId, List<TimeSlot> slots) async {
     try {
-      print('slotMaps: i want to see this');
-      // Convert the List<TimeSlot> to a format suitable for Firestore.
       List<Map<String, dynamic>> slotMaps =
           slots.map((slot) => slot.toMap()).toList();
 
-      print('slotMaps: $slotMaps');
-
-      // Use the Firestore instance to access the 'merchants' collection and then the specific merchant document.
-      // Use set with SetOptions(merge: true) to either create the document or merge the fields.
       await _db.collection('merchants').doc(merchantId).set({
         'availableTimeSlots': slotMaps,
       }, SetOptions(merge: true));
-      print('slotMaps: i want to see this 2');
 
       // If the operation is successful, return true.
       return true;
     } catch (e) {
-      // If there is an error during the operation, print it to the console and return false.
       print("Error setting merchant availability: $e");
       return false;
     }
@@ -74,19 +67,17 @@ class MerchantService {
           return slots;
         }
       }
-      return []; // Return an empty list if no slots are found or the merchant doesn't exist
+      return [];
     } catch (e) {
       print("Error fetching merchant time slots: $e");
-      return []; // Return an empty list in case of error
+      return [];
     }
   }
 
   Future<bool> deleteTimeSlot(String merchantId, TimeSlot slotToDelete) async {
     try {
-      // Get a reference to the merchant's document
       var merchantDoc = _db.collection('merchants').doc(merchantId);
 
-      // Perform a transaction to safely delete the time slot
       return _db.runTransaction((transaction) async {
         // Get the document snapshot
         var snapshot = await transaction.get(merchantDoc);
@@ -95,10 +86,8 @@ class MerchantService {
           throw Exception("Merchant not found!");
         }
 
-        // Get current list of time slots
         var slots = List.from(snapshot.data()?['availableTimeSlots'] ?? []);
 
-        // Determine which slot to remove
         slots.removeWhere((slot) => slot['id'] == slotToDelete.id);
 
         // Update the document with the new list
@@ -135,7 +124,7 @@ class MerchantService {
       var slotsData = List<Map<String, dynamic>>.from(
           merchantData['availableTimeSlots'] ?? []);
 
-      // Mark selected slots as booked
+      // Mark selected slots
       for (var slot in slotsData) {
         if (slotIds.contains(slot['id'])) {
           slot['booked'] = true;
@@ -146,8 +135,66 @@ class MerchantService {
       await merchantRef.update({'availableTimeSlots': slotsData});
       return true;
     } catch (e) {
-      print("Error marking slots as booked: $e");
+      print("Error marking slots as bookeds: $e");
       return false;
+    }
+  }
+
+  Future<List<AppointmentDetail>> fetchAppointmentsByMerchant(
+      String merchantId) async {
+    try {
+      final querySnapshot = await _db
+          .collection('appointments')
+          .where('merchantId', isEqualTo: merchantId)
+          .get();
+
+      List<AppointmentDetail> appointmentDetails = [];
+      for (var doc in querySnapshot.docs) {
+        var appointmentData = doc.data();
+        if (appointmentData == null ||
+            appointmentData is! Map<String, dynamic>) {
+          continue;
+        }
+        var appointment = Appointment.fromMap(appointmentData);
+
+        // Fetch customer name
+        var customerSnapshot =
+            await _db.collection('customers').doc(appointment.customerId).get();
+        String customerName = customerSnapshot.data()?['name'] ?? 'Unknown';
+
+        // Fetch merchant document to get availableTimeSlots
+        var merchantSnapshot =
+            await _db.collection('merchants').doc(merchantId).get();
+        var merchantData = merchantSnapshot.data();
+        TimeSlot timeSlot;
+
+        if (merchantData != null) {
+          List<dynamic> timeSlotsData =
+              merchantData['availableTimeSlots'] ?? [];
+          var timeSlotData = timeSlotsData.firstWhere(
+            (t) => t['id'] == appointment.timeSlotId,
+            orElse: () => null,
+          );
+
+          if (timeSlotData != null) {
+            timeSlot = TimeSlot.fromMap(timeSlotData as Map<String, dynamic>);
+          } else {
+            continue;
+          }
+        } else {
+          continue;
+        }
+
+        appointmentDetails.add(AppointmentDetail(
+          appointmentId: doc.id,
+          customerName: customerName,
+          timeSlot: timeSlot,
+        ));
+      }
+      return appointmentDetails;
+    } catch (e) {
+      print("Error fetching appointments: $e");
+      return [];
     }
   }
 }

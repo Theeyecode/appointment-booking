@@ -1,4 +1,3 @@
-// merchant_time_slot_screen.dart
 import 'package:appointment_booking_app/providers/customer_providers.dart';
 import 'package:appointment_booking_app/providers/merchant_providers.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/app/app_colors.dart';
-// Ensure this is imported
 
 class MerchantTimeSlotScreen extends ConsumerStatefulWidget {
   final Merchant merchant;
@@ -16,21 +14,20 @@ class MerchantTimeSlotScreen extends ConsumerStatefulWidget {
   const MerchantTimeSlotScreen({super.key, required this.merchant});
 
   @override
-  _MerchantTimeSlotScreenState createState() => _MerchantTimeSlotScreenState();
+  MerchantTimeSlotScreenState createState() => MerchantTimeSlotScreenState();
 }
 
-class _MerchantTimeSlotScreenState
+class MerchantTimeSlotScreenState
     extends ConsumerState<MerchantTimeSlotScreen> {
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Ensure merchant ID is passed (debugging purpose)
       if (mounted) {
         ref
             .read(merchantProvider.notifier)
-            .loadMerchantTimeSlots(widget.merchant.id);
+            .fetchOrCreateMerchant(widget.merchant.id);
       }
     });
   }
@@ -73,23 +70,23 @@ class _MerchantTimeSlotScreenState
           selectedSlotIds.clear();
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Slots booked successfully!')),
+          const SnackBar(content: Text('Slots booked successfully!')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to book some slots.')),
+          const SnackBar(content: Text('Failed to book some slots.')),
         );
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to mark slots as booked.')),
+        const SnackBar(content: Text('Failed to mark slots as booked.')),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final timeSlots = ref.read(merchantProvider.notifier).timeSlots ?? [];
+    final timeSlots = ref.watch(merchantProvider)?.availableTimeSlots ?? [];
 // Ensure time slots are loaded (debugging purpose
     final categorizedSlots = _categorizeTimeSlotsByDate(timeSlots);
     final sortedDates = categorizedSlots.keys.toList()..sort();
@@ -100,7 +97,7 @@ class _MerchantTimeSlotScreenState
         actions: [
           if (selectedSlotIds.isNotEmpty)
             IconButton(
-              icon: Icon(Icons.save),
+              icon: const Icon(Icons.save),
               onPressed: _saveSelectedSlots,
             ),
         ],
@@ -128,12 +125,9 @@ class _MerchantTimeSlotScreenState
                   ),
                 ),
                 Wrap(
-                  // Use Wrap here
-                  spacing: 8.0, // Add horizontal spacing between children
-                  runSpacing: 8.0, // Add vertical spacing between lines
+                  spacing: 8.0,
+                  runSpacing: 8.0,
                   children: slots.map((slot) {
-                    print(slots.length);
-
                     bool isSelected = selectedSlotIds.contains(slot.id);
                     return MerchantTimeSlotWidget(
                       slot: slot,
