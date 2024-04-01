@@ -1,15 +1,20 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:appointment_booking_app/features/customer/models/appointment.dart';
 import 'package:appointment_booking_app/features/merchants/data/merchant_backend.dart';
 import 'package:appointment_booking_app/features/merchants/models/merchants.dart';
 import 'package:appointment_booking_app/features/merchants/models/time_slot.dart';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-// Adjust path as necessary
 
 class MerchantNotifier extends StateNotifier<Merchant?> {
   final _merchantService = MerchantService();
 
-  MerchantNotifier() : super(null);
+  Ref ref;
+
+  MerchantNotifier(
+    this.ref,
+  ) : super(null);
 
   List<Appointment>? _appointments;
   List<Appointment>? get appointments => _appointments;

@@ -106,22 +106,33 @@ class MerchantService {
     }
   }
 
-  Future<List<Merchant>> fetchMerchants() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    try {
-      QuerySnapshot querySnapshot = await _db
-          .collection('merchants')
-          .orderBy('created_at', descending: false)
-          .get();
-      List<Merchant> merchants = querySnapshot.docs.map((doc) {
+  // Future<List<Merchant>> fetchMerchants() async {
+  //   await Future.delayed(const Duration(milliseconds: 500));
+  //   try {
+  //     QuerySnapshot querySnapshot = await _db
+  //         .collection('merchants')
+  //         .orderBy('created_at', descending: false)
+  //         .get();
+  //     List<Merchant> merchants = querySnapshot.docs.map((doc) {
+  //       return Merchant.fromMap(doc.data() as Map<String, dynamic>);
+  //     }).toList();
+  //     print('Merchants :${merchants.length}');
+  //     return merchants;
+  //   } catch (e) {
+  //     print("Error fetching merchants: $e");
+  //     return [];
+  //   }
+  // }
+  Stream<List<Merchant>> fetchMerchants() {
+    return _db
+        .collection('merchants')
+        .orderBy('created_at', descending: false)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
         return Merchant.fromMap(doc.data() as Map<String, dynamic>);
       }).toList();
-      print('Merchants :${merchants.length}');
-      return merchants;
-    } catch (e) {
-      print("Error fetching merchants: $e");
-      return [];
-    }
+    });
   }
 
   Future<bool> markSlotsAsBooked(String merchantId, Set<String> slotIds) async {
@@ -150,169 +161,18 @@ class MerchantService {
     }
   }
 
-  Stream<List<Appointment>> fetchAppointmentsByCustomerStream() {
-    final customerId = FirebaseAuth.instance.currentUser!.uid;
-    return FirebaseFirestore.instance
-        .collection('appointments')
-        .where('customerId', isEqualTo: customerId)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => Appointment.fromMap(doc.data()))
-            .toList());
-  }
+  Stream<List<Appointment>> fetchMerchantAppointmentsStream(String merchantId) {
+    print('got here nahh1');
 
-  Future<MerchantBookingDetail> fetchMerchantAndTimeSlotDetails(
-      Appointment appointment) async {
-    try {
-      // Fetch merchant details
-      DocumentSnapshot merchantSnapshot = await FirebaseFirestore.instance
-          .collection('merchants')
-          .doc(appointment.merchantId)
-          .get();
-      if (!merchantSnapshot.exists) {
-        throw Exception("Merchant not found");
-      }
-      Merchant merchant =
-          Merchant.fromMap(merchantSnapshot.data() as Map<String, dynamic>);
-
-      // Assuming the timeslot ID is directly accessible and you have a method or a way to fetch it
-      TimeSlot? timeSlot;
-      for (var slotData in merchant.availableTimeSlots ?? []) {
-        if (slotData.id == appointment.timeSlotId) {
-          timeSlot = slotData;
-          break;
-        }
-      }
-
-      if (timeSlot == null) {
-        throw Exception("TimeSlot not found");
-      }
-
-      return MerchantBookingDetail(
-        appointmentId: appointment.id,
-        merchantName: merchant.name,
-        timeSlot: timeSlot,
-        // Optional, if you want to include customer name in details
-      );
-    } catch (e) {
-      print("Error fetching merchant and time slot details: $e");
-      // Handle error, perhaps by returning a placeholder detail or re-throwing the exception
-      throw Exception("Failed to fetch details");
-    }
-  }
-
-  Stream<List<Appointment>> fetchAppointmentsByMerchantStream() {
-    final merchantId = FirebaseAuth.instance.currentUser!.uid;
-    return FirebaseFirestore.instance
+    return _db
         .collection('appointments')
         .where('merchantId', isEqualTo: merchantId)
+        // .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => Appointment.fromMap(doc.data()))
-            .toList());
-  }
-
-  Future<CustomerBookingDetail> fetchCustomerAndTimeSlotDetails(
-      Appointment appointment) async {
-    try {
-      // Fetch merchant details
-      DocumentSnapshot merchantSnapshot = await FirebaseFirestore.instance
-          .collection('merchants')
-          .doc(appointment.merchantId)
-          .get();
-      if (!merchantSnapshot.exists) {
-        throw Exception("Merchant not found");
-      }
-
-      var customerSnapshot =
-          await _db.collection('customers').doc(appointment.customerId).get();
-      String customerName = customerSnapshot.data()?['name'] ?? 'Unknown';
-
-      Merchant merchant =
-          Merchant.fromMap(merchantSnapshot.data() as Map<String, dynamic>);
-
-      // Assuming the timeslot ID is directly accessible and you have a method or a way to fetch it
-      TimeSlot? timeSlot;
-      for (var slotData in merchant.availableTimeSlots ?? []) {
-        if (slotData.id == appointment.timeSlotId) {
-          timeSlot = slotData;
-          break;
-        }
-      }
-
-      if (timeSlot == null) {
-        throw Exception("TimeSlot not found");
-      }
-
-      return CustomerBookingDetail(
-        appointmentId: appointment.id,
-        customerName: customerName,
-        timeSlot: timeSlot,
-        // Optional, if you want to include customer name in details
-      );
-    } catch (e) {
-      print("Error fetching merchant and time slot details: $e");
-      // Handle error, perhaps by returning a placeholder detail or re-throwing the exception
-      throw Exception("Failed to fetch details");
-    }
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => Appointment.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
+    });
   }
 }
-
-
- // Future<List<CustomerBookingDetail>> fetchAppointmentsByMerchant(
-  //     String merchantId) async {
-  //   try {
-  //     final querySnapshot = await _db
-  //         .collection('appointments')
-  //         .where('merchantId', isEqualTo: merchantId)
-  //         .get();
-
-  //     List<CustomerBookingDetail> appointmentDetails = [];
-  //     for (var doc in querySnapshot.docs) {
-  //       var appointmentData = doc.data();
-  //       if (appointmentData == null ||
-  //           appointmentData is! Map<String, dynamic>) {
-  //         continue;
-  //       }
-  //       var appointment = Appointment.fromMap(appointmentData);
-
-  //       // Fetch customer name
-  //       var customerSnapshot =
-  //           await _db.collection('customers').doc(appointment.customerId).get();
-  //       String customerName = customerSnapshot.data()?['name'] ?? 'Unknown';
-
-  //       // Fetch merchant document to get availableTimeSlots
-  //       var merchantSnapshot =
-  //           await _db.collection('merchants').doc(merchantId).get();
-  //       var merchantData = merchantSnapshot.data();
-  //       TimeSlot timeSlot;
-
-  //       if (merchantData != null) {
-  //         List<dynamic> timeSlotsData =
-  //             merchantData['availableTimeSlots'] ?? [];
-  //         var timeSlotData = timeSlotsData.firstWhere(
-  //           (t) => t['id'] == appointment.timeSlotId,
-  //           orElse: () => null,
-  //         );
-
-  //         if (timeSlotData != null) {
-  //           timeSlot = TimeSlot.fromMap(timeSlotData as Map<String, dynamic>);
-  //         } else {
-  //           continue;
-  //         }
-  //       } else {
-  //         continue;
-  //       }
-
-  //       appointmentDetails.add(CustomerBookingDetail(
-  //         appointmentId: doc.id,
-  //         customerName: customerName,
-  //         timeSlot: timeSlot,
-  //       ));
-  //     }
-  //     return appointmentDetails;
-  //   } catch (e) {
-  //     print("Error fetching appointments: $e");
-  //     return [];
-  //   }
-  // }

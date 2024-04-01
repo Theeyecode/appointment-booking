@@ -90,7 +90,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
         break;
       case UserType.customer:
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => HomePage()),
+          MaterialPageRoute(builder: (context) => const HomePage()),
           (Route<dynamic> route) => false,
         );
         break;

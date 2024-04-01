@@ -22,7 +22,6 @@ class CustomerService {
         Customer newCustomer = Customer(
           id: customerId,
           name: name ?? 'New Customer',
-          appointments: [],
         );
         await customerRef.set(newCustomer.toMap());
 
@@ -31,7 +30,10 @@ class CustomerService {
     } catch (e) {
       print("Error fetching customer: $e");
     }
-    return Customer(id: '', name: '', appointments: []);
+    return Customer(
+      id: '',
+      name: '',
+    );
   }
 
   Future<void> updateCustomer(Customer customer) async {
@@ -49,15 +51,28 @@ class CustomerService {
   Future<bool> addAppointmentToCustomer(
       String customerId, Appointment appointment) async {
     try {
-      // If you want a specific document ID, otherwise Firestore generates it
       await _firestore
           .collection('appointments')
           .doc(appointment.id)
           .set(appointment.toMap());
-
+      print('Appointment added successfully for customer ID: $customerId');
       return true;
     } catch (e) {
+      print(
+          'Failed to add appointment for customer ID: $customerId, Error: $e');
       return false;
     }
+  }
+
+  Stream<List<Appointment>> fetchCustomerAppointmentsStream(String customerId) {
+    return _firestore
+        .collection('appointments')
+        .where('customerId', isEqualTo: customerId)
+        // .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) =>
+                Appointment.fromMap(doc.data() as Map<String, dynamic>))
+            .toList());
   }
 }

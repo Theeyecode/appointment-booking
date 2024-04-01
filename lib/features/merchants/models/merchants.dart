@@ -14,6 +14,18 @@ class Merchant {
     this.availableTimeSlots,
   });
 
+  TimeSlot? getTimeSlotById(String timeSlotId) {
+    final x = availableTimeSlots?.firstWhere(
+      (slot) => slot.id == timeSlotId,
+    );
+    if (x == null) {
+      print('It was null here');
+      return null;
+    } else {
+      return x;
+    }
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,

@@ -15,12 +15,12 @@ class MerchantListScreen extends ConsumerWidget {
 
   Future<void> _refreshMerchants(WidgetRef ref) async {
     // Call the provider to refresh merchants
-    await ref.read(listmerchantProvider.future);
+    await ref.read(listmerchantStreamProvider.future);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final merchantsAsyncValue = ref.watch(listmerchantProvider);
+    final merchantsAsyncValue = ref.watch(listmerchantStreamProvider);
     final authValue = ref.read(authStateProvider.notifier);
 
     return Scaffold(

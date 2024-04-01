@@ -3,18 +3,15 @@ import 'package:appointment_booking_app/features/customer/models/appointment.dar
 class Customer {
   final String id;
   final String name;
-  List<Appointment>? appointments;
 
   Customer({
     required this.id,
     required this.name,
-    this.appointments,
   });
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'name': name,
-      'appointments': appointments?.map((a) => a.toMap()).toList(),
     };
   }
 
@@ -22,10 +19,6 @@ class Customer {
     return Customer(
       id: map['id'],
       name: map['name'],
-      appointments: map['appointments'] != null
-          ? List<Appointment>.from(
-              map['appointments'].map((a) => Appointment.fromMap(a)))
-          : [],
     );
   }
 }

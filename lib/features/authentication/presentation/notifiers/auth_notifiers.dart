@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:appointment_booking_app/features/authentication/data/auth_abstract.dart';
 import 'package:appointment_booking_app/providers/customer_providers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -16,14 +17,13 @@ import 'package:appointment_booking_app/providers/merchant_providers.dart';
 import 'package:appointment_booking_app/shared/show_toast.dart';
 
 class AuthStateNotifier extends StateNotifier<AuthState> {
-  final _authenticator = Authenticator();
-  final _userManagement = UserManagement();
+  final IAuthenticator _authenticator;
+  final UserManagement _userManagement;
 
   Ref ref;
 
-  AuthStateNotifier(
-    this.ref,
-  ) : super(const AuthState.unknown());
+  AuthStateNotifier(this._authenticator, this._userManagement, this.ref)
+      : super(const AuthState.unknown());
 
   Future<void> logOut() async {
     state = state.copyWithIsLoading(true);
@@ -83,7 +83,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     final userType = userModel?.userType ?? UserType.unKnown;
     switch (userType) {
       case UserType.merchant:
-        await ref
+        await ref!
             .read(merchantProvider.notifier)
             .fetchOrCreateMerchant(state.userId!);
         Navigator.of(context).pushAndRemoveUntil(
@@ -93,7 +93,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         );
         break;
       case UserType.customer:
-        await ref
+        await ref!
             .read(customerProvider.notifier)
             .fetchOrCreateCustomer(state.userId!);
         Navigator.of(context).pushAndRemoveUntil(
@@ -114,11 +114,11 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     final result =
         await _authenticator.registerWithEmailPassword(email, password);
     await FirebaseAuth.instance.currentUser?.updateDisplayName(name);
-    final dname = FirebaseAuth.instance.currentUser?.displayName;
+    final dname = FirebaseAuth.instance.currentUser?.displayName ?? name;
     if (result == AuthResult.success) {
       final user = UserModel(
         id: _authenticator.userId!,
-        displayName: dname ?? '',
+        displayName: dname,
         email: email,
         userType: UserType.unKnown,
       );
@@ -184,7 +184,9 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   // Example role selection method
   Future<bool> selectRole(UserType selectedRole, BuildContext context) async {
     final currentUser = FirebaseAuth.instance.currentUser;
+
     if (currentUser != null) {
+      
       final updatedUser = UserModel(
         id: currentUser.uid,
         displayName: currentUser.displayName ?? 'No Name',
@@ -192,18 +194,23 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         userType: selectedRole,
       );
 
+
       // Update the user in Firestore and wait for completion.
       await _userManagement.updateUser(updatedUser);
       UserModel? fetchedUser = await _userManagement.getUser(currentUser.uid);
+ 
 
       if (fetchedUser != null) {
+
         _userModel = fetchedUser;
         state = state.copyWith(userTypeSelectionRequired: false);
 
         if (selectedRole == UserType.merchant) {
+       
           await ref.read(merchantProvider.notifier).fetchOrCreateMerchant(
               fetchedUser.id,
               name: fetchedUser.displayName);
+        
         } else if (selectedRole == UserType.customer) {
           await ref.read(customerProvider.notifier).fetchOrCreateCustomer(
               fetchedUser.id,
@@ -218,6 +225,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         return false;
       }
     }
+    print('three');
     return false;
   }
 }

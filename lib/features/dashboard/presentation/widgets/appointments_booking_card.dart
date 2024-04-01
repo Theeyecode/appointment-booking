@@ -1,3 +1,4 @@
+import 'package:appointment_booking_app/shared/spacer.dart';
 import 'package:flutter/material.dart';
 
 class AppointmentPreviewCard extends StatelessWidget {
@@ -15,8 +16,9 @@ class AppointmentPreviewCard extends StatelessWidget {
 
     return Column(
       children: [
+        const Height20(),
         Container(
-          margin: const EdgeInsets.symmetric(horizontal: 12.0),
+          margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10),
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8.0),

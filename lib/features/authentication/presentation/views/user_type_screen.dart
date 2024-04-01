@@ -1,3 +1,4 @@
+import 'package:appointment_booking_app/shared/spacer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:appointment_booking_app/core/app/app_colors.dart';
@@ -41,13 +42,19 @@ class UserTypeScreenState extends ConsumerState<UserTypeScreen> {
                   height: context.screenHeight(0.05),
                 ),
                 UserTypeCard(
+                  description:
+                      'Easily find and book appointments with top professionals',
+                  asset: 'assets/pngs/customer.png',
                   onpressed: () => selectUserType(UserType.customer),
-                  trader: UserType.customer,
+                  userType: UserType.customer,
                   deccolor: AppColors.bg.withOpacity(0.1),
                 ),
                 UserTypeCard(
+                  description:
+                      'Grow your business by connecting with more customers',
+                  asset: 'assets/pngs/merchant.png',
                   onpressed: () => selectUserType(UserType.merchant),
-                  trader: UserType.merchant,
+                  userType: UserType.merchant,
                   deccolor: const Color(0xFFF78F50).withOpacity(0.13),
                 ),
               ],
@@ -105,12 +112,16 @@ class UserTypeScreenState extends ConsumerState<UserTypeScreen> {
 class UserTypeCard extends StatelessWidget {
   const UserTypeCard({
     super.key,
-    required this.trader,
+    required this.userType,
     required this.deccolor,
     this.onpressed,
+    required this.asset,
+    required this.description,
   });
-  final UserType trader;
+  final UserType userType;
   final Color deccolor;
+  final String asset;
+  final String description;
   final VoidCallback? onpressed;
 
   @override
@@ -133,13 +144,24 @@ class UserTypeCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(
-                trader.title,
-                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                      color: AppColors.textdark,
-                      fontWeight: FontWeight.w600,
-                    ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    userType.title,
+                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                          color: AppColors.textdark,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  Image.asset(
+                    asset,
+                    height: 50,
+                  )
+                ],
               ),
+              const Height10(),
+              Text(description)
             ],
           ),
         ),

@@ -12,10 +12,9 @@ class HomePage extends ConsumerStatefulWidget {
 class HomePageState extends ConsumerState<HomePage> {
   int _selectedIndex = 0;
 
-  // Updated to include BookedScreen
   static final List<Widget> _widgetOptions = <Widget>[
-    const MerchantListScreen(), // Displays the merchant list
-    const BookedScreen() // Displays booked appointments
+    const MerchantListScreen(),
+    const BookedScreen()
   ];
 
   void _onItemTapped(int index) {
@@ -26,8 +25,6 @@ class HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Removed AppBar from here to allow each screen to have its own
-
     return Scaffold(
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(

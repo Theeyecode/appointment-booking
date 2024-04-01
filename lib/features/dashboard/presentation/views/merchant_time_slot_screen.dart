@@ -57,7 +57,7 @@ class MerchantTimeSlotScreenState
       for (String slotId in selectedSlotIds) {
         final success = await ref
             .read(customerProvider.notifier)
-            .bookSlot(widget.merchant.id, slotId);
+            .bookSlot(widget.merchant, slotId);
         if (!success) {
           bookingSuccess = false;
           break; // Exit the loop if any booking fails.

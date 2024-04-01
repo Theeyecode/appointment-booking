@@ -8,8 +8,8 @@ import 'package:appointment_booking_app/features/merchants/presentation/widgets/
 import 'package:appointment_booking_app/features/merchants/presentation/widgets/fab.dart';
 import 'package:appointment_booking_app/providers/auth_providers.dart';
 import 'package:appointment_booking_app/providers/merchant_providers.dart';
-import 'package:appointment_booking_app/providers/user_id_provider.dart';
 import 'package:appointment_booking_app/shared/shimmer.dart';
+import 'package:appointment_booking_app/shared/spacer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -55,8 +55,9 @@ class MerchantDashboardScreenState
     // final asyncAppointments = idToUse != null
     //     ? ref.watch(appointmentsByMerchantProvider(idToUse))
     //     : null;
-    final appointmentsStream =
-        ref.watch(merchantServiceProvider).fetchAppointmentsByMerchantStream();
+    final appointmentsStream = ref
+        .watch(merchantServiceProvider)
+        .fetchMerchantAppointmentsStream(merchant.userModel!.id);
 
     return Scaffold(
       backgroundColor: Colors.grey[200],
@@ -176,180 +177,97 @@ class MerchantDashboardScreenState
             child: StreamBuilder<List<Appointment>>(
               stream: appointmentsStream,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.active) {
-                  final appointments = snapshot.data ?? [];
+                // First, handle the case where there is an error.
+                if (snapshot.hasError) {
+                  print('Error: ${snapshot.error}');
+                  return Text('Error: ${snapshot.error}');
+                }
+
+                // Next, handle the loading state.
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return ShimmerLoading(); // Show a shimmer loading indicator while waiting for data
+                }
+
+                // If the snapshot has data, then display the appointments.
+                if (snapshot.hasData) {
+                  // Sort appointments by their timeSlot start time
+                  var appointments = snapshot.data!;
                   if (appointments.isEmpty) {
+                    // If there are no appointments, show the AppointmentPreviewCard.
                     return const AppointmentPreviewCard();
                   }
                   return ListView.builder(
+                    controller: _scrollController,
                     itemCount: appointments.length,
                     itemBuilder: (context, index) {
                       final appointment = appointments[index];
-                      return FutureBuilder<CustomerBookingDetail>(
-                        future: ref
-                            .read(merchantServiceProvider)
-                            .fetchCustomerAndTimeSlotDetails(appointment),
-                        builder: (context, detailSnapshot) {
-                          if (detailSnapshot.connectionState ==
-                              ConnectionState.done) {
-                            final details = detailSnapshot.data;
-                            final startTime = DateFormat('HH:mm')
-                                .format(details!.timeSlot.start);
-                            final endTime = DateFormat('HH:mm')
-                                .format(details.timeSlot.end);
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 10, horizontal: 16.0),
-                              child: Container(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Row(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: Image.asset(
-                                          'assets/pngs/user_photo.png'),
-                                    ),
-                                    const SizedBox(
-                                      width: 12,
-                                    ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          details.customerName,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16),
-                                        ),
-                                        const SizedBox(
-                                          height: 4,
-                                        ),
-                                        Text(
-                                          DateFormat('EEEE, MMMM d, yyyy')
-                                              .format(DateTime.parse(
-                                                  '${details.timeSlot.date}')),
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.grey,
-                                              fontSize: 14),
-                                        ),
-                                        const SizedBox(
-                                          height: 4,
-                                        ),
-                                        Text(
-                                          "$startTime - $endTime",
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.grey,
-                                              fontSize: 14),
-                                        ),
-                                      ],
-                                    )
-                                  ],
-                                ),
+                      final startTime = DateFormat('HH:mm')
+                          .format(appointment.timeSlot.start);
+                      final endTime =
+                          DateFormat('HH:mm').format(appointment.timeSlot.end);
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 16.0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child:
+                                    Image.asset('assets/pngs/user_photo.png'),
                               ),
-                            );
-                          }
-                          return const SizedBox(); // Placeholder for loading state
-                        },
+                              const SizedBox(
+                                width: 12,
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    appointment.customer.name,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16),
+                                  ),
+                                  const SizedBox(
+                                    height: 4,
+                                  ),
+                                  Text(
+                                    DateFormat('EEEE, MMMM d, yyyy').format(
+                                        DateTime.parse(
+                                            '${appointment.timeSlot.date}')),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey,
+                                        fontSize: 14),
+                                  ),
+                                  const SizedBox(
+                                    height: 4,
+                                  ),
+                                  Text(
+                                    "$startTime - $endTime",
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey,
+                                        fontSize: 14),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
                       );
                     },
                   );
                 }
                 return ShimmerLoading();
-                // return ShimmerLoading(); // Placeholder for initial loading state
               },
             ),
-
-            // child: asyncAppointments!.when(
-            //   data: (appointments) {
-            //     if (appointments.isEmpty) {
-            //       return Center(
-            //         child: Padding(
-            //           padding: const EdgeInsets.all(24.0),
-            //           child: Image.asset('assets/svgs/no_customer.png'),
-            //         ),
-            //       );
-            //     } else {
-            //       return ListView.builder(
-            //         physics: const BouncingScrollPhysics(),
-            //         controller: _scrollController,
-            //         itemCount: appointments.length,
-            //         itemBuilder: (context, index) {
-            //           final appointment = appointments[index];
-            //           final startTime = DateFormat('HH:mm')
-            //               .format(appointment.timeSlot.start);
-            //           final endTime =
-            //               DateFormat('HH:mm').format(appointment.timeSlot.end);
-            //           return Padding(
-            //             padding: const EdgeInsets.symmetric(
-            //                 horizontal: 16.0, vertical: 4),
-            //             child: Container(
-            //               padding: const EdgeInsets.symmetric(vertical: 8),
-            //               decoration: BoxDecoration(
-            //                 color: Colors.white,
-            //                 borderRadius: BorderRadius.circular(16),
-            //               ),
-            //               child: Row(
-            //                 children: [
-            //                   ClipRRect(
-            //                     borderRadius: BorderRadius.circular(12),
-            //                     child:
-            //                         Image.asset('assets/pngs/user_photo.png'),
-            //                   ),
-            //                   const SizedBox(
-            //                     width: 12,
-            //                   ),
-            //                   Column(
-            //                     crossAxisAlignment: CrossAxisAlignment.start,
-            //                     children: [
-            //                       Text(
-            //                         appointment.customerName,
-            //                         style: const TextStyle(
-            //                             fontWeight: FontWeight.bold,
-            //                             fontSize: 16),
-            //                       ),
-            //                       const SizedBox(
-            //                         height: 4,
-            //                       ),
-            //                       Text(
-            //                         DateFormat('EEEE, MMMM d, yyyy').format(
-            //                             DateTime.parse(
-            //                                 '${appointment.timeSlot.date}')),
-            //                         style: const TextStyle(
-            //                             fontWeight: FontWeight.bold,
-            //                             color: Colors.grey,
-            //                             fontSize: 14),
-            //                       ),
-            //                       const SizedBox(
-            //                         height: 4,
-            //                       ),
-            //                       Text(
-            //                         "$startTime - $endTime",
-            //                         style: const TextStyle(
-            //                             fontWeight: FontWeight.bold,
-            //                             color: Colors.grey,
-            //                             fontSize: 14),
-            //                       ),
-            //                     ],
-            //                   )
-            //                 ],
-            //               ),
-            //             ),
-            //           );
-            //         },
-            //       );
-            //     }
-            //   },
-            //   loading: () => ShimmerLoading(),
-            //   error: (error, stack) => Center(child: Text('Error: $error')),
-            // ),
           ),
         ],
       ),
