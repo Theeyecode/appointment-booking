@@ -35,8 +35,8 @@ class MyApp extends StatelessWidget {
           '/home': (context) => const HomePage(),
           '/userTypeSelection': (context) => const UserTypeScreen(),
         },
-       
-        home: const LoginScreen(),
+
+        home: const UserTypeScreen(),
       ),
     );
   }

@@ -258,9 +258,8 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                           LoadingScreen.instance().hide();
                         }
                       },
-                      child: const SquareTile(
-                          imagePath:
-                              '/Users/emmanuelolajubu/appointment_booking_app/assets/pngs/google.png'),
+                      child:
+                          const SquareTile(imagePath: 'assets/pngs/google.png'),
                     ),
                   ],
                 ),

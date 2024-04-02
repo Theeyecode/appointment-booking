@@ -128,41 +128,44 @@ class UserTypeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onpressed,
-      child: Container(
-        margin: EdgeInsets.only(bottom: context.screenHeight(0.03)),
-        height: context.screenHeight(0.22),
-        width: context.screenWidth(0.93),
-        decoration: BoxDecoration(
-          color: deccolor,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: context.screenWidth(0.05),
-            vertical: context.screenHeight(0.04),
+      child: SingleChildScrollView(
+        child: Container(
+          margin: EdgeInsets.only(bottom: context.screenHeight(0.03)),
+          height: context.screenHeight(0.22),
+          width: context.screenWidth(0.93),
+          decoration: BoxDecoration(
+            color: deccolor,
+            borderRadius: BorderRadius.circular(8),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    userType.title,
-                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                          color: AppColors.textdark,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  Image.asset(
-                    asset,
-                    height: 50,
-                  )
-                ],
-              ),
-              const Height10(),
-              Text(description)
-            ],
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: context.screenWidth(0.05),
+              vertical: context.screenHeight(0.04),
+            ),
+            child: ListView(
+              // crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      userType.title,
+                      style:
+                          Theme.of(context).textTheme.headlineMedium!.copyWith(
+                                color: AppColors.textdark,
+                                fontWeight: FontWeight.w600,
+                              ),
+                    ),
+                    Image.asset(
+                      asset,
+                      height: 50,
+                    )
+                  ],
+                ),
+                const Height10(),
+                Text(description)
+              ],
+            ),
           ),
         ),
       ),
